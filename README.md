@@ -19,6 +19,18 @@ Every story is dated and sourced — checked Sunday 22 November 2026;
 claims are labelled as claims on the poster; market figures are
 Friday's closes, reported on Sunday.
 
+Revision 4 (chasing the top of the board) keeps all 64 stories and
+adds: full scene illustrations for the three leads (a Gulf radar base
+under fire, a barrage over a city skyline and river bridge, a
+conference hall with globe, clock and delegates), richer panel art,
+the source outlet named on every story, a key-numbers strip under the
+masthead (~200 nations at COP31, the 03:00 GMT objections deadline,
+404 drones, 110+ missiles, 9 killed, 2 US bases), a regions bar whose
+counts are computed from the story list (Europe 19, Middle East 6,
+Asia-Pacific 9, Americas 19, Africa 3, Global 8), and a DATE CHECK
+box that fences off other days' news (the Peru earthquake of 20 Nov
+and the Poland missile falls of 21 Nov are deliberately left out).
+
 ## Files
 
 - `main.ts` — stdlib-only entrypoint (Node 22). Copies `assets/poster.png`
