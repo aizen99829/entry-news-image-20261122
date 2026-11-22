@@ -4,6 +4,8 @@
 // output directory. Standard library only, no network access. The output
 // directory comes from MAKEFUN_OUTPUT_DIR, defaulting to /output.
 // The poster bytes are fixed, so every run writes identical output.
+// Revision 2 packs the page denser: 64 verified stories (three leads, ten
+// illustrated panels, a 41-item index and a ten-line IN BRIEF strip).
 
 import { copyFileSync, mkdirSync } from "node:fs";
 import { join } from "node:path";

@@ -1,10 +1,12 @@
 """Render The Daily Compass front page for Sunday 22 November 2026.
 
-A dense newspaper poster drawn with Pillow primitives: masthead, three lead
-panels with small pictograms, ten smaller illustrated panels, a schematic
-world map with numbered pins, and a two-column index of the day's remaining
-stories. Output is deterministic: the same code always writes byte-identical
-PNG bytes.
+Revision 2 (denser edition): the same newspaper front page packed tighter —
+smaller body type, tighter leading, a three-column index and a rapid-fire
+IN BRIEF strip — so one 1024x1024 page now carries 64 verified stories:
+three lead panels, ten smaller illustrated panels, a schematic world map
+with numbered pins 1-13, a numbered index for stories 14-54, and ten
+one-line briefs numbered 55-64. Output is deterministic: the same code
+always writes byte-identical PNG bytes.
 """
 
 from pathlib import Path
@@ -274,31 +276,30 @@ def draw_art(img, kind, x, y, w, h):
     tile = tile.resize((w, h), Image.LANCZOS)
     img.paste(tile, (x, y))
 
-# --- panels -----------------------------------------------------------------
+# --- panels (revision 2: tighter boxes, smaller type) ------------------------
 
 def lead_panel(img, d, box, num, art, headline, deck):
     x0, y0, x1, y1 = box
     frame(d, box)
-    ax0, ay0, ax1, ay1 = x0 + 2, y0 + 2, x1 - 2, y0 + 96
+    ax0, ay0, ax1, ay1 = x0 + 2, y0 + 2, x1 - 2, y0 + 72
     draw_art(img, art, ax0, ay0, ax1 - ax0, ay1 - ay0)
-    d.line([(x0 + 2, y0 + 96), (x1 - 2, y0 + 96)], fill=EDGE, width=2)
-    badge(d, x0 + 16, y0 + 16, num)
-    fn = f(SANSB, 20)
-    y = para(d, x0 + 10, y0 + 106, headline, fn, x1 - x0 - 20, 24)
-    para(d, x0 + 10, y + 2, deck, f(SANS, 13), x1 - x0 - 20, 16, max_lines=3)
+    d.line([(x0 + 2, y0 + 72), (x1 - 2, y0 + 72)], fill=EDGE, width=2)
+    badge(d, x0 + 15, y0 + 15, num, r=12)
+    y = para(d, x0 + 9, y0 + 80, headline, f(SANSB, 17), x1 - x0 - 18, 20,
+             max_lines=3)
+    para(d, x0 + 9, y + 2, deck, f(SANS, 12), x1 - x0 - 18, 15, max_lines=3)
 
 
 def mini_panel(img, d, box, num, art, headline, deck):
     x0, y0, x1, y1 = box
     frame(d, box)
-    ix, iy = x0 + 8, y0 + 8
-    draw_art(img, art, ix, iy, 62, 62)
-    d.rectangle([ix, iy, ix + 62, iy + 62], outline=EDGE, width=1)
-    badge(d, x0 + 14, y0 + 14, num, r=10)
-    tx = x0 + 78
-    fn = f(SANSB, 13)
-    y = para(d, tx, y0 + 6, headline, fn, x1 - tx - 6, 16, max_lines=4)
-    para(d, x0 + 8, y0 + 76, deck, f(SANS, 11), x1 - x0 - 16, 14, max_lines=4)
+    ix, iy = x0 + 7, y0 + 7
+    draw_art(img, art, ix, iy, 52, 52)
+    d.rectangle([ix, iy, ix + 52, iy + 52], outline=EDGE, width=1)
+    badge(d, x0 + 12, y0 + 12, num, r=9)
+    tx = x0 + 66
+    para(d, tx, y0 + 5, headline, f(SANSB, 12), x1 - tx - 5, 14, max_lines=4)
+    para(d, x0 + 7, y0 + 63, deck, f(SANS, 11), x1 - x0 - 14, 12.5, max_lines=4)
 
 
 # (lon, lat) outlines, drawn schematically
@@ -373,17 +374,17 @@ def project(lon, lat, x0, y0, w, h):
 def draw_map(d, box):
     x0, y0, x1, y1 = box
     d.rectangle([x0, y0, x1, y1], fill=SEA, outline=EDGE, width=2)
-    d.text((x0 + 8, y0 + 4), "WHERE THE NEWS HAPPENED — PINS 1–13",
-           font=f(SANSB, 12), fill=INK)
-    mx0, my0 = x0 + 8, y0 + 24
-    mw, mh = x1 - x0 - 16, y1 - y0 - 30
+    d.text((x0 + 8, y0 + 3), "WHERE THE NEWS HAPPENED — PINS 1–13",
+           font=f(SANSB, 11), fill=INK)
+    mx0, my0 = x0 + 8, y0 + 19
+    mw, mh = x1 - x0 - 16, y1 - y0 - 23
     for poly in CONTINENTS:
         pts = [project(lon, lat, mx0, my0, mw, mh) for lon, lat in poly]
         d.polygon(pts, fill=LAND, outline=LAND_EDGE)
     for i, (lat, lon) in enumerate(PINS, start=1):
         px, py = project(lon, lat, mx0, my0, mw, mh)
         dx, dy = NUDGES[i - 1]
-        badge(d, px + dx, py + dy, i, r=9)
+        badge(d, px + dx, py + dy, i, r=8)
 
 # --- story data ---------------------------------------------------------------
 
@@ -425,6 +426,7 @@ MINIS = [
      "Peter Fluck, satire puppet pioneer, dies at home in Cornwall."),
 ]
 
+# stories 14-54: the original 25 (14-38) plus 16 researched for this revision
 INDEX = [
     "Estonia to close border with Russia; Moscow decries 'new Iron Curtain'",
     "Trump and Xi meet in Shenzhen; Japan challenges ahead",
@@ -451,37 +453,101 @@ INDEX = [
     "LA train heists net thieves $22m in goods, feds say",
     "Court pauses Iowa Army lead-azide blast; eyes Monday",
     "Thanksgiving storms may bring record coastal flooding to N. California",
+    "Saudi-led coalition intercepts three Houthi missiles at Riyadh",
+    "Fire at Iraq's Hartha power station kills at least four, injures 35",
+    "Toxic liquor kills at least 11 in India's Manipur; 180 in hospital",
+    "At least 24 dead as boat capsizes on funeral trip in Nigeria",
+    "Blasts reported near Russian Baltic Fleet base in Kaliningrad",
+    "Finland probes suspected Russian helicopter incursion",
+    "UN talks agree first international pact on autonomous weapons",
+    "Four Palestinians killed in Gaza amid ceasefire breaches, medics say",
+    "Denmark seeks EU-wide curbs on Russian tourists after murder-plot claim",
+    "Zagreb protesters demand answers over hospital patient death",
+    "Asia shares plunge as AI sell-off spreads; Nikkei -5.1%, Kospi -5.5%",
+    "Trump warns US firms building AI data centres abroad of 'tremendous tax'",
+    "Chinese banks issue rare joint warning on precious-metals risk",
+    "Nvidia finances face SEC inquiry, sources say",
+    "Voyager 1 now one light-day from Earth, a first for any spacecraft",
+    "Webb study reconstructs stellar merger in Andromeda galaxy",
 ]
+
+# stories 55-64: rapid-fire one-liners
+BRIEFS = [
+    "Zverev and Alcaraz reach ATP Finals title match in Turin",
+    "Ireland beat South Africa 20-17 in Dublin",
+    "France rout Argentina 45-17 to reach Nations Championship final",
+    "Russell takes Las Vegas GP pole, 0.098s clear of Sainz",
+    "Pakistan beat Sri Lanka by 8 wickets to seal Test series 1-0",
+    "Harden scores 51 as Cavaliers beat Pacers 128-119 in NBA Cup",
+    "Ronaldo nets 986th career goal but misses penalty in Al-Nassr loss",
+    "Ramayana overtakes Godzilla Minus Zero at the box office",
+    "Lattice-crypto method speeds NASA pulsar hunt a million-fold",
+    "Leapmotor Q3 profit plunges 73% despite record deliveries",
+]
+
+
+def flow_columns(d, items, first_num, font, colw, ncols):
+    """Wrap numbered items and split them into balanced columns.
+
+    Returns a list of ncols columns, each a list of (lines) per item, with
+    items kept in reading order down column 1, then column 2, and so on.
+    """
+    entries = [wrap(d, f"{first_num + j}. {item}", font, colw)
+               for j, item in enumerate(items)]
+    total = sum(len(e) for e in entries)
+    cols = [[] for _ in range(ncols)]
+    counts = [0] * ncols
+    ci = 0
+    for e in entries:
+        if ci < ncols - 1 and counts[ci] > 0 and counts[ci] >= total / ncols:
+            ci += 1
+        cols[ci].append(e)
+        counts[ci] += len(e)
+    return cols
+
+
+def draw_flow(d, cols, x0, y, colw, gap, font, leading, item_gap=1.0):
+    bottom = y
+    for ci, col in enumerate(cols):
+        x = x0 + ci * (colw + gap)
+        yy = y
+        for lines in col:
+            for ln in lines:
+                d.text((x, yy), ln, font=font, fill=INK)
+                yy += leading
+            yy += item_gap
+        bottom = max(bottom, yy - item_gap)
+    return bottom
 
 
 def build():
     img = Image.new("RGB", (W, H), PAPER)
     d = ImageDraw.Draw(img)
 
-    # masthead
+    # masthead (tightened)
     title = "The Daily Compass"
-    tf = f(SERIFB, 58)
-    d.text(((W - tw(d, title, tf)) / 2, 6), title, font=tf, fill=INK)
-    rule(d, MARGIN, 78, W - MARGIN, 3)
-    d.text((MARGIN, 84), "Sunday 22 November 2026",
-           font=f(SANSB, 15), fill=INK)
-    right = "38 verified stories — reported Sunday 22 Nov 2026"
-    d.text((W - MARGIN - tw(d, right, f(SANS, 14)), 85), right,
-           font=f(SANS, 14), fill=MUTED)
-    rule(d, MARGIN, 106, W - MARGIN, 2)
+    tf = f(SERIFB, 50)
+    d.text(((W - tw(d, title, tf)) / 2, 2), title, font=tf, fill=INK)
+    rule(d, MARGIN, 64, W - MARGIN, 3)
+    d.text((MARGIN, 70), "Sunday 22 November 2026",
+           font=f(SANSB, 14), fill=INK)
+    right = "64 verified stories — reported Sunday 22 Nov 2026"
+    d.text((W - MARGIN - tw(d, right, f(SANS, 13)), 71), right,
+           font=f(SANS, 13), fill=MUTED)
+    rule(d, MARGIN, 90, W - MARGIN, 2)
 
     # lead row: 3 panels
-    top = 114
+    top = 96
     lw = (W - 2 * MARGIN - 2 * 10) // 3
-    lh = 232
+    lh = 182
     for i, (art, head, deck) in enumerate(LEADS):
         x0 = MARGIN + i * (lw + 10)
         lead_panel(img, d, (x0, top, x0 + lw, top + lh), i + 1, art, head, deck)
 
     # mini rows: 2 x 5
-    my = top + lh + 10
+    my = top + lh + 8
     mw = (W - 2 * MARGIN - 4 * 8) // 5
-    mh = 148
+    mh = 118
     for r in range(2):
         for c in range(5):
             i = r * 5 + c
@@ -491,29 +557,36 @@ def build():
             mini_panel(img, d, (x0, y0, x0 + mw, y0 + mh), i + 4, art, head, deck)
 
     # map strip
-    mapy = my + 2 * mh + 8 + 10
-    draw_map(d, (MARGIN, mapy, W - MARGIN, mapy + 112))
+    mapy = my + 2 * mh + 8 + 8
+    draw_map(d, (MARGIN, mapy, W - MARGIN, mapy + 80))
 
-    # index
-    iy = mapy + 112 + 8
-    d.text((MARGIN, iy), "ALSO TODAY — INDEX 14–38",
-           font=f(SANSB, 14), fill=INK)
-    rule(d, MARGIN, iy + 22, W - MARGIN, 2)
-    fn = f(SANS, 12)
-    colw = (W - 2 * MARGIN - 30) // 2
-    y = iy + 28
-    for j, item in enumerate(INDEX):
-        col = 0 if j < 13 else 1
-        row = j if j < 13 else j - 13
-        x = MARGIN + col * (colw + 30)
-        yy = y + row * 13.5
-        d.text((x, yy), f"{14 + j}. {item}", font=fn, fill=INK)
-    foot = y + 13 * 13.5 + 4
+    # index: three balanced columns, stories 14-54
+    iy = mapy + 80 + 8
+    d.text((MARGIN, iy), "ALSO TODAY — INDEX 14–54",
+           font=f(SANSB, 13), fill=INK)
+    rule(d, MARGIN, iy + 18, W - MARGIN, 2)
+    ifn = f(SANS, 10)
+    icolw = (W - 2 * MARGIN - 2 * 20) // 3
+    icols = flow_columns(d, INDEX, 14, ifn, icolw, 3)
+    ibot = draw_flow(d, icols, MARGIN, iy + 24, icolw, 20, ifn, 11)
+
+    # in brief: two columns of one-liners, stories 55-64
+    by = ibot + 8
+    d.text((MARGIN, by), "IN BRIEF — THE REST OF THE DAY IN ONE LINE EACH",
+           font=f(SANSB, 13), fill=INK)
+    rule(d, MARGIN, by + 18, W - MARGIN, 2)
+    bfn = f(SANS, 10)
+    bcolw = (W - 2 * MARGIN - 24) // 2
+    bcols = flow_columns(d, BRIEFS, 55, bfn, bcolw, 2)
+    bbot = draw_flow(d, bcols, MARGIN, by + 24, bcolw, 24, bfn, 11)
+
+    # footer
+    foot = bbot + 8
     rule(d, MARGIN, foot, W - MARGIN, 1)
-    d.text((MARGIN, foot + 6),
+    d.text((MARGIN, foot + 5),
            "Sources on file for every story. Claims are labelled as claims; "
            "market figures are Friday's closes, reported Sunday 22 November 2026.",
-           font=f(SANS, 11), fill=MUTED)
+           font=f(SANS, 10), fill=MUTED)
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
     img.save(OUT, format="PNG", optimize=True)

@@ -5,10 +5,11 @@
 [![reward](https://make.fun/badge/news-image-20261122/aizen99829/entry-news-image-20261122/reward.svg)](https://make.fun/bounty/news-image-20261122?utm_source=github&utm_medium=readme&utm_campaign=news-image-20261122)
 
 A dense newspaper front-page poster for the make.fun
-[news-image-20261122](https://make.fun/bounty/news-image-20261122) competition. One 1024x1024 image carries 38
+[news-image-20261122](https://make.fun/bounty/news-image-20261122) competition. One 1024x1024 image carries 64
 verified stories reported on Sunday 22 November 2026: three lead
 panels, ten smaller illustrated panels, a schematic world map with
-numbered pins 1-13, and a numbered text index for stories 14-38.
+numbered pins 1-13, a numbered text index for stories 14-54, and an
+IN BRIEF strip of ten one-line stories numbered 55-64.
 
 Lead stories: Iran claiming new strikes on US Patriot radars in Bahrain
 as the Gulf confrontation widens, Zelensky calling the Crimea bridge
