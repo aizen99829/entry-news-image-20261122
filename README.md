@@ -4,12 +4,12 @@
 [![rank](https://make.fun/badge/news-image-20261122/aizen99829/entry-news-image-20261122/rank.svg)](https://make.fun/bounty/news-image-20261122/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=news-image-20261122)
 [![reward](https://make.fun/badge/news-image-20261122/aizen99829/entry-news-image-20261122/reward.svg)](https://make.fun/bounty/news-image-20261122?utm_source=github&utm_medium=readme&utm_campaign=news-image-20261122)
 
-A dense newspaper front-page poster for the make.fun
-[news-image-20261122](https://make.fun/bounty/news-image-20261122) competition. One 1024x1024 image carries 64
+An art-led newspaper front-page poster for the make.fun
+[news-image-20261122](https://make.fun/bounty/news-image-20261122) competition. One 1024x1024 image carries 40
 verified stories reported on Sunday 22 November 2026: three lead
-panels, ten smaller illustrated panels, a schematic world map with
-numbered pins 1-13, a numbered text index for stories 14-54, and an
-IN BRIEF strip of ten one-line stories numbered 55-64.
+cards with large scene illustrations, twelve illustrated panels
+with bold headlines (stories 4-15), and a readable numbered text
+index for stories 16-40.
 
 Lead stories: Iran claiming new strikes on US Patriot radars in Bahrain
 as the Gulf confrontation widens, Zelensky calling the Crimea bridge
@@ -19,31 +19,33 @@ Every story is dated and sourced — checked Sunday 22 November 2026;
 claims are labelled as claims on the poster; market figures are
 Friday's closes, reported on Sunday.
 
-Revision 4 (chasing the top of the board) keeps all 64 stories and
-adds: full scene illustrations for the three leads (a Gulf radar base
-under fire, a barrage over a city skyline and river bridge, a
-conference hall with globe, clock and delegates), richer panel art,
-the source outlet named on every story, a key-numbers strip under the
+Revision 4 (chasing the top of the board) added: full scene
+illustrations for the three leads (a Gulf radar base under fire, a
+barrage over a city skyline and river bridge, a conference hall
+with globe, clock and delegates), richer panel art, the source
+outlet named on every story, a key-numbers strip under the
 masthead (~200 nations at COP31, the 03:00 GMT objections deadline,
-404 drones, 110+ missiles, 9 killed, 2 US bases), a regions bar whose
-counts are computed from the story list (Europe 19, Middle East 6,
-Asia-Pacific 9, Americas 19, Africa 3, Global 8), and a DATE CHECK
-box that fences off other days' news (the Peru earthquake of 20 Nov
-and the Poland missile falls of 21 Nov are deliberately left out).
+404 drones, 110+ missiles, 9 killed, 2 US bases), a regions bar
+whose counts are computed from the story list, and a DATE CHECK
+box that fences off other days' news (the Peru earthquake of
+20 Nov and the Poland missile falls of 21 Nov are deliberately
+left out). Revision 5 deepened the three lead scenes (haloed moon
+and bursts, searchlights, sea reflections, smoke, chandeliers,
+eight delegates) at 64 stories.
 
-Revision 5 (art focus) changes no words: the three lead scenes are
-drawn more than twice as tall and much deeper — a dusk-to-night Gulf
-coast with a haloed moon, searchlight beams, a detailed phased-array
-radar and dish, two incoming missile arcs and light reflecting on
-the sea; a taller two-layer skyline under glowing missile trails,
-seven drones, three haloed explosions with smoke plumes and a lit
-river bridge; and a warmer COP31 hall with chandeliers, banners, a
-graticule globe, eight delegates with papers and water glasses, and
-larger near-side delegates seen from behind. The panel pictograms
-sit under the same soft top light. The space comes from a tighter
-masthead and stats strip, shorter mini panels, a lower map strip
-and a notch tighter index and brief type; all 64 stories, every
-source tag, the regions bar and the DATE CHECK box are unchanged.
+Revision 6 changes direction: fewer, bigger stories. The page is
+now led by its pictures — the three lead scenes at 190px tall
+under 19pt headlines, then twelve illustrated panels whose scenes
+are drawn at native size beside bold 13.5pt headlines (four of
+them new: an Estonian border fence at dusk, a plunging Asia
+markets chart, the Voyager probe signalling a tiny Earth, and a
+pyramid of gold bars under a red risk arrow). The remaining 25
+stories run in a four-column index at a readable 10.5pt. The
+thinnest one-liners of the 64 are dropped; every kept story keeps
+its verified wording and source tag. The regions bar is computed
+from the final 40-story list (Europe 11, Middle East 5,
+Asia-Pacific 6, Americas 11, Africa 2, Global 5); the key-numbers
+strip and the DATE CHECK box are unchanged.
 
 ## Files
 

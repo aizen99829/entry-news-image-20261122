@@ -1,17 +1,15 @@
 """Render The Daily Compass front page for Sunday 22 November 2026.
 
-Revision 5 (art focus): the content of revision 4 is frozen — the
-same 64 verified stories, corrected Ukraine and COP31 leads,
-orphan-free wrapping, source outlet on every story, key-numbers
-strip, computed regions bar and DATE CHECK box. What changes is the
-artwork: the three lead scenes are drawn almost twice as tall and
-much deeper (layered sky gradients, moon and burst halos, searchlight
-beams, a sea with light reflections, a taller two-layer skyline with
-glowing missile trails and smoke, a warmer conference hall with
-banners, chandeliers and more delegates), and the panel pictograms
-sit under the same soft top light. The space comes from a slightly
-tighter masthead and stats strip, shorter mini panels, a lower map
-strip and a notch tighter index and brief type. Output is
+Revision 6 (direction change, on Tuan's order): the dense 64-story
+newspaper becomes an art-led front page of 40 stories. The three
+lead scenes stay and grow again; below them a grid of twelve
+illustrated panels carries real little scenes at native size, each
+with a bold headline; the remaining 25 stories run in a compact but
+readable index at 10.5pt. The thinnest one-liners of the 64 are
+dropped; every kept story keeps its verified wording and source
+tag. The honesty devices stay: source outlet on every story,
+key-numbers strip, regions bar computed from the final story list,
+DATE CHECK box and the dated-and-sourced footer. Output is
 deterministic: the same code always writes byte-identical PNG bytes.
 """
 
@@ -671,12 +669,123 @@ def art_film(d, x, y, w, h):
     d.rectangle([cx - 40, cy - 30, cx - 20, cy - 18], fill=(120, 120, 130))
 
 
+def art_border(d, x, y, w, h):
+    # dusk sky in bands, snow below, a border fence and a watchtower
+    for i, col in enumerate(((196, 120, 90), (214, 150, 105),
+                             (228, 182, 128))):
+        d.rectangle([x, y + h * i // 3, x + w, y + h * (i + 1) // 3],
+                    fill=col)
+    d.rectangle([x, y + h - 24, x + w, y + h], fill=(238, 240, 244))
+    gy = y + h - 24
+    # watchtower on the right, lamp lit
+    tx = x + w - 26
+    d.polygon([(tx - 3, gy - 44), (tx + 19, gy - 44), (tx + 8, gy - 52)],
+              fill=(38, 36, 34))
+    d.rectangle([tx, gy - 44, tx + 16, gy - 30], fill=(52, 48, 44))
+    d.rectangle([tx + 5, gy - 41, tx + 11, gy - 34], fill=(250, 220, 130))
+    d.line([(tx + 2, gy - 30), (tx + 2, gy)], fill=(52, 48, 44), width=3)
+    d.line([(tx + 14, gy - 30), (tx + 14, gy)], fill=(52, 48, 44), width=3)
+    # fence: posts, three wires, barbed ticks along each wire
+    for px in range(x + 6, x + w - 30, 13):
+        d.line([(px, gy - 26), (px, gy)], fill=(40, 38, 36), width=2)
+    for wy in (gy - 25, gy - 17, gy - 9):
+        d.line([(x + 3, wy), (x + w - 4, wy)], fill=(40, 38, 36), width=1)
+    for px in range(x + 9, x + w - 30, 13):
+        for wy in (gy - 25, gy - 17, gy - 9):
+            d.line([(px - 2, wy - 2), (px + 2, wy + 2)],
+                   fill=(40, 38, 36), width=1)
+            d.line([(px - 2, wy + 2), (px + 2, wy - 2)],
+                   fill=(40, 38, 36), width=1)
+    # a small red warning sign hung on the fence
+    d.rectangle([x + 8, gy - 22, x + 20, gy - 12], fill=RED,
+                outline=WHITE, width=1)
+
+
+def art_chart(d, x, y, w, h):
+    d.rectangle([x, y, x + w, y + h], fill=(16, 22, 38))
+    # screen grid
+    for gx in range(x + 10, x + w - 6, 16):
+        d.line([(gx, y + 8), (gx, y + h - 20)], fill=(40, 52, 78), width=1)
+    for gy in range(y + 10, y + h - 18, 14):
+        d.line([(x + 6, gy), (x + w - 6, gy)], fill=(40, 52, 78), width=1)
+    # the plunging line, glow under-stroke and a bright core
+    pts = [(x + 8, y + 22), (x + 26, y + 18), (x + 40, y + 30),
+           (x + 54, y + 28), (x + 68, y + 46), (x + 82, y + 62),
+           (x + 94, y + 74)]
+    d.line(pts, fill=(120, 40, 34), width=5)
+    d.line(pts, fill=(240, 84, 60), width=2)
+    for px, py in pts:
+        d.ellipse([px - 2, py - 2, px + 2, py + 2], fill=(255, 170, 140))
+    ex, ey = pts[-1]
+    d.polygon([(ex - 5, ey + 2), (ex + 6, ey + 3), (ex + 1, ey + 12)],
+              fill=(240, 84, 60))
+    # volume bars along the bottom, growing as the fall deepens
+    for i, bh in enumerate((5, 6, 8, 7, 11, 14, 17)):
+        bx = x + 8 + i * 13
+        d.rectangle([bx, y + h - 6 - bh, bx + 7, y + h - 6],
+                    fill=(70, 96, 140))
+
+
+def art_probe(d, x, y, w, h):
+    d.rectangle([x, y, x + w, y + h], fill=(10, 12, 30))
+    for i in range(16):
+        px = x + 5 + (i * 37) % (w - 10)
+        py = y + 5 + (i * 23) % (h - 10)
+        d.ellipse([px, py, px + 2, py + 2], fill=WHITE)
+    cx, cy = x + 38, y + 58
+    # the great dish, tipped toward home
+    d.pieslice([cx - 30, cy - 30, cx + 30, cy + 30], 300, 140,
+               fill=(206, 210, 216), outline=(120, 126, 134))
+    d.line([(cx, cy), (cx + 20, cy - 16)], fill=(150, 156, 164), width=2)
+    circle(d, cx + 21, cy - 17, 3, (220, 224, 230))
+    # gold-foil body and the long instrument boom
+    d.rectangle([cx - 6, cy + 8, cx + 8, cy + 22], fill=GOLD,
+                outline=(120, 84, 20))
+    d.line([(cx + 2, cy + 20), (cx + 34, cy + 34)],
+           fill=(170, 176, 184), width=2)
+    d.rectangle([cx + 32, cy + 31, cx + 40, cy + 39], fill=(150, 156, 164))
+    # a dotted signal path to a tiny Earth, one light-day away
+    pts = arc_pts((cx + 21, cy - 17), (x + 64, y + 8), (x + w - 24, y + 13))
+    dot_trail(d, pts, (140, 190, 235), 1, 2)
+    circle(d, x + w - 18, y + 16, 5, (90, 150, 220))
+    circle(d, x + w - 19, y + 15, 2, GREEN)
+
+
+def art_gold(d, x, y, w, h):
+    d.rectangle([x, y, x + w, y + h], fill=(34, 28, 26))
+    # the arc of a vault door behind the bars
+    d.arc([x + 18, y + 6, x + w - 18, y + 70], 180, 360,
+          fill=(110, 96, 84), width=3)
+
+    def bar(bx, by, bw=26):
+        d.polygon([(bx + 3, by), (bx + bw - 3, by), (bx + bw, by + 9),
+                   (bx, by + 9)], fill=(196, 148, 40),
+                  outline=(120, 84, 20))
+        d.polygon([(bx + 3, by), (bx + bw - 3, by), (bx + bw - 6, by + 4),
+                   (bx + 6, by + 4)], fill=(246, 205, 92))
+
+    base = y + h - 16
+    for i in range(3):
+        bar(x + 12 + i * 28, base - 10)
+    for i in range(2):
+        bar(x + 26 + i * 28, base - 21)
+    bar(x + 40, base - 32)
+    d.line([(x + 6, base + 2), (x + w - 6, base + 2)],
+           fill=(110, 96, 84), width=2)
+    # a red downward arrow in the corner: the risk warning itself
+    ax, ay = x + w - 20, y + 12
+    d.line([(ax - 8, ay), (ax + 6, ay + 12)], fill=RED, width=4)
+    d.polygon([(ax + 1, ay + 6), (ax + 11, ay + 13), (ax + 2, ay + 17)],
+              fill=RED)
+
+
 ART = {
     "blast": art_blast, "bridge": art_bridge, "climate": art_climate,
     "trade": art_trade, "arrest": art_arrest, "database": art_database,
     "rugby": art_rugby, "football": art_football, "cricket": art_cricket,
     "planet": art_planet, "ballot": art_ballot, "hospital": art_hospital,
-    "film": art_film,
+    "film": art_film, "border": art_border, "chart": art_chart,
+    "probe": art_probe, "gold": art_gold,
 }
 
 
@@ -706,7 +815,7 @@ def draw_art(img, kind, x, y, w, h):
 
 # --- panels, strips and boxes -------------------------------------------------
 
-LEAD_ART_H = 168
+LEAD_ART_H = 190
 
 
 def lead_panel(img, d, box, num, art, headline, deck, src):
@@ -717,23 +826,26 @@ def lead_panel(img, d, box, num, art, headline, deck, src):
     d.line([(x0 + 2, y0 + LEAD_ART_H + 2), (x1 - 2, y0 + LEAD_ART_H + 2)],
            fill=EDGE, width=2)
     badge(d, x0 + 15, y0 + 15, num, r=12)
-    y = para(d, x0 + 9, y0 + LEAD_ART_H + 9, headline, f(SANSB, 16),
-             x1 - x0 - 18, 19, max_lines=3)
-    para(d, x0 + 9, y + 1, deck, f(SANS, 11), x1 - x0 - 18, 13.5, max_lines=3)
+    y = para(d, x0 + 9, y0 + LEAD_ART_H + 9, headline, f(SANSB, 19),
+             x1 - x0 - 18, 21.5, max_lines=3)
+    para(d, x0 + 9, y + 2, deck, f(SANS, 11), x1 - x0 - 18, 13.5,
+         max_lines=3)
     d.text((x0 + 9, y1 - 14), src, font=f(SANSB, 8), fill=MUTED)
 
 
-def mini_panel(img, d, box, num, art, headline, deck, src):
+def feature_panel(img, d, box, num, art, headline, src):
+    """An illustrated panel: a real little scene at native 96x96,
+    a bold headline beside it, the source tag along the bottom."""
     x0, y0, x1, y1 = box
     frame(d, box)
-    ix, iy = x0 + 6, y0 + 5
-    draw_art(img, art, ix, iy, 40, 40)
-    d.rectangle([ix, iy, ix + 40, iy + 40], outline=EDGE, width=1)
-    badge(d, x0 + 11, y0 + 11, num, r=9)
-    tx = x0 + 52
-    para(d, tx, y0 + 5, headline, f(SANSB, 11), x1 - tx - 5, 13, max_lines=3)
-    para(d, x0 + 6, y0 + 49, deck, f(SANS, 10), x1 - x0 - 12, 11, max_lines=3)
-    d.text((x0 + 6, y1 - 11), src, font=f(SANSB, 8), fill=MUTED)
+    ix, iy = x0 + 4, y0 + 4
+    draw_art(img, art, ix, iy, 96, 96)
+    d.rectangle([ix, iy, ix + 96, iy + 96], outline=EDGE, width=1)
+    badge(d, x0 + 13, y0 + 13, num, r=9)
+    tx = x0 + 106
+    para(d, tx, y0 + 6, headline, f(SANSB, 13.5), x1 - tx - 5, 16.5,
+         max_lines=5)
+    d.text((tx, y1 - 13), src, font=f(SANSB, 8), fill=MUTED)
 
 
 def stats_strip(d, box, stats):
@@ -742,14 +854,14 @@ def stats_strip(d, box, stats):
     d.rectangle([x0, y0, x1, y1], fill=PANEL, outline=EDGE, width=1)
     n = len(stats)
     cw = (x1 - x0) / n
-    nf = f(SANSB, 16)
+    nf = f(SANSB, 15)
     lf = f(SANS, 8)
     for i, (num, label) in enumerate(stats):
         cx = x0 + i * cw
         if i:
             d.line([(cx, y0 + 4), (cx, y1 - 4)], fill=EDGE, width=1)
         d.text((cx + (cw - tw(d, num, nf)) / 2, y0 + 1), num, font=nf, fill=RED)
-        d.text((cx + (cw - tw(d, label, lf)) / 2, y0 + 20), label,
+        d.text((cx + (cw - tw(d, label, lf)) / 2, y0 + 18), label,
                font=lf, fill=MUTED)
 
 
@@ -895,96 +1007,65 @@ LEADS = [
      "(AP · DPA · LaPresse)", "GL"),
 ]
 
-MINIS = [
+# stories 4-15: illustrated panels (art, headline, source tag, region).
+# The first eight keep their revision-4 scenes; border, chart, probe
+# and gold are drawn new for this revision from index stories.
+PANELS = [
     ("trade", "EU and Indonesia sign trade deal",
-     "After ten years of talks, a pact to scrap 98.5% of tariffs.",
      "(Global Digest)", "GL"),
     ("arrest", "Mexico captures 'El Chapo Isidro'",
-     "FBI Ten Most Wanted drug lord held after a shoot-out in Sinaloa; a $5m reward.",
      "(AP · NYT)", "AM"),
     ("database", "FBI probes hack of crime database",
-     "Apparent breach of the national criminal records system is investigated.",
      "(BBC)", "AM"),
     ("rugby", "England crush All Blacks 37-12",
-     "Record Twickenham win, five tries; New Zealand lose twice in a row.",
      "(Flashscore)", "EU"),
     ("football", "Leeds stun Chelsea 4-1",
-     "First win at Stamford Bridge since 1999; Okafor scores twice.",
      "(BBC)", "EU"),
     ("cricket", "India lead New Zealand by 118",
-     "Day 3 stumps in Wellington: NZ 368, India 486/4. Nicholls 175, Rahul 136.",
      "(UNP)", "AP"),
     ("planet", "BepiColombo reaches Mercury",
-     "Europe-Japan probe enters orbit after an eight-year voyage.",
      "(Axo News)", "GL"),
     ("ballot", "Hong Kong votes for Election Committee",
-     "About 5,700 voters choose members of the powerful body.",
      "(Global Digest)", "AP"),
-    ("hospital", "Bolsonaro in ICU",
-     "Brazil's jailed ex-president admitted with acute bowel obstruction.",
-     "(Times of India)", "AM"),
-    ("film", "Spitting Image co-creator dies at 85",
-     "Peter Fluck, satire puppet pioneer, dies at home in Cornwall.",
-     "(BBC)", "EU"),
+    ("border", "Estonia to close border with Russia; Moscow decries 'new Iron Curtain'",
+     "(Jagran)", "EU"),
+    ("chart", "Asia shares plunge as AI sell-off spreads; Nikkei -5.1%, Kospi -5.5%",
+     "(Weekend Buzz)", "AP"),
+    ("probe", "Voyager 1 now one light-day from Earth, a first for any spacecraft",
+     "(CASRAI)", "GL"),
+    ("gold", "Chinese banks issue rare joint warning on precious-metals risk",
+     "(Weekend Buzz)", "AP"),
 ]
 
-# stories 14-54: (text, source tag, region)
+# stories 16-40: the index (text, source tag, region) — the meatiest
+# of the old 41-item index, plus the two demoted panel stories (in
+# their deck wording) and the Ronaldo one-liner from the old briefs.
 INDEX = [
-    ("Estonia to close border with Russia; Moscow decries 'new Iron Curtain'", "(Jagran)", "EU"),
     ("Trump and Xi meet in Shenzhen; Japan challenges ahead", "(Global Digest)", "AP"),
     ("Judge approves $7.25bn Roundup weedkiller settlement", "(BBC)", "AM"),
-    ("Lock of George Washington's hair sells for $4,000", "(BBC)", "AM"),
     ("US airlines warned of al-Qaeda-linked attack risk before Thanksgiving", "(TOI)", "AM"),
     ("House races still uncalled; Democratic majority in flux", "(Axo News)", "AM"),
-    ("CMS proposes Medicare Advantage overhaul", "(Axo News)", "AM"),
-    ("Trump signs Common Cents Act", "(Media Alert)", "AM"),
     ("Quebecor's $31bn Telus bid would reshape Canadian telecom", "(Axo News)", "AM"),
     ("Mets' $400m Tarik Skubal offer headlines MLB hot stove", "(Axo News)", "AM"),
     ("Arsenal six points clear after 2-2 draw at Newcastle", "(NYT · BBC)", "EU"),
-    ("Man City held by Fulham; Anderson volley earns point", "(BBC)", "EU"),
-    ("Real Madrid beat Celta Vigo 2-1", "(ScoreZaap)", "EU"),
-    ("MI Emirates beat Desert Vipers by 52 runs in ILT20 opener", "(Sportradar)", "ME"),
     ("French police sentenced over beating of producer Michel Zecler", "(BBC)", "EU"),
-    ("Miliband: EU deal not dependent on tuition fees", "(BBC)", "EU"),
-    ("Trafalgar Square Christmas tree felled in Norway", "(BBC)", "EU"),
     ("Russia-bound ship attacked in Gulf of Finland; Ukraine likely behind it", "(Reuters)", "EU"),
-    ("Teen gamer and mother helped rescue missing girl", "(BBC)", "GL"),
     ("ANC fights to keep control of South Africa's key cities", "(BBC)", "AF"),
-    ("Nigerian youth and the election question", "(BBC)", "AF"),
-    ("FEMA office found infested with bed bugs; 1,000 staff sent home", "(Life Science)", "AM"),
     ("LA train heists net thieves $22m in goods, feds say", "(Media Alert)", "AM"),
-    ("Court pauses Iowa Army lead-azide blast; eyes Monday", "(Edit USA)", "AM"),
     ("Thanksgiving storms may bring record coastal flooding to N. California", "(Edit USA)", "AM"),
-    ("Saudi-led coalition intercepts three Houthi missiles at Riyadh", "(90 Seconds)", "ME"),
-    ("Fire at Iraq's Hartha power station kills at least four, injures 35", "(90 Seconds)", "ME"),
     ("Toxic liquor kills at least 11 in India's Manipur; 180 in hospital", "(90 Seconds)", "AP"),
-    ("At least 24 dead as boat capsizes on funeral trip in Nigeria", "(News Media)", "AF"),
-    ("Blasts reported near Russian Baltic Fleet base in Kaliningrad", "(snowurb)", "EU"),
     ("Finland probes suspected Russian helicopter incursion", "(AppiSToS)", "EU"),
     ("UN talks agree first international pact on autonomous weapons", "(snowurb)", "GL"),
     ("Four Palestinians killed in Gaza amid ceasefire breaches, medics say", "(WAFA)", "ME"),
-    ("Denmark seeks EU-wide curbs on Russian tourists after murder-plot claim", "(snowurb)", "EU"),
-    ("Zagreb protesters demand answers over hospital patient death", "(AppiSToS)", "EU"),
-    ("Asia shares plunge as AI sell-off spreads; Nikkei -5.1%, Kospi -5.5%", "(Weekend Buzz)", "AP"),
     ("Trump warns US firms building AI data centres abroad of 'tremendous tax'", "(Weekend Buzz)", "AM"),
-    ("Chinese banks issue rare joint warning on precious-metals risk", "(Weekend Buzz)", "AP"),
-    ("Nvidia finances face SEC inquiry, sources say", "(snowurb)", "AM"),
-    ("Voyager 1 now one light-day from Earth, a first for any spacecraft", "(CASRAI)", "GL"),
-    ("Webb study reconstructs stellar merger in Andromeda galaxy", "(CASRAI)", "GL"),
-]
-
-# stories 55-64: rapid-fire one-liners (text, source tag, region)
-BRIEFS = [
-    ("Zverev and Alcaraz reach ATP Finals title match in Turin", "(kendanafrica)", "EU"),
-    ("Ireland beat South Africa 20-17 in Dublin", "(kendanafrica)", "EU"),
-    ("France rout Argentina 45-17 to reach Nations Championship final", "(Apex Sports)", "EU"),
-    ("Russell takes Las Vegas GP pole, 0.098s clear of Sainz", "(kendanafrica)", "AM"),
-    ("Pakistan beat Sri Lanka by 8 wickets to seal Test series 1-0", "(Daily Dose)", "AP"),
-    ("Harden scores 51 as Cavaliers beat Pacers 128-119 in NBA Cup", "(Flashscore)", "AM"),
+    ("Saudi-led coalition intercepts three Houthi missiles at Riyadh", "(90 Seconds)", "ME"),
+    ("Fire at Iraq's Hartha power station kills at least four, injures 35", "(90 Seconds)", "ME"),
+    ("At least 24 dead as boat capsizes on funeral trip in Nigeria", "(News Media)", "AF"),
+    ("Blasts reported near Russian Baltic Fleet base in Kaliningrad", "(snowurb)", "EU"),
+    ("Denmark seeks EU-wide curbs on Russian tourists after murder-plot claim", "(snowurb)", "EU"),
+    ("Brazil's jailed ex-president admitted with acute bowel obstruction", "(Times of India)", "AM"),
+    ("Peter Fluck, satire puppet pioneer, dies at home in Cornwall", "(BBC)", "EU"),
     ("Ronaldo nets 986th career goal but misses penalty in Al-Nassr loss", "(Apex Sports)", "ME"),
-    ("Ramayana overtakes Godzilla Minus Zero at the box office", "(Standard Topic)", "AP"),
-    ("Lattice-crypto method speeds NASA pulsar hunt a million-fold", "(CASRAI)", "GL"),
-    ("Leapmotor Q3 profit plunges 73% despite record deliveries", "(Weekend Buzz)", "AP"),
 ]
 
 # key numbers for the strip under the masthead — each figure is in SOURCES.md
@@ -1011,7 +1092,7 @@ DATE_CHECK_TEXT = (
 
 def regions_bar():
     counts = {}
-    for story in LEADS + MINIS + INDEX + BRIEFS:
+    for story in LEADS + PANELS + INDEX:
         counts[story[-1]] = counts.get(story[-1], 0) + 1
     return "  ·  ".join(f"{name} {counts.get(code, 0)}"
                          for code, name in REGION_ORDER)
@@ -1062,88 +1143,80 @@ def build():
     img = Image.new("RGB", (W, H), PAPER)
     d = ImageDraw.Draw(img)
 
+    total = len(LEADS) + len(PANELS) + len(INDEX)
+
     # masthead
     title = "The Daily Compass"
-    tf = f(SERIFB, 44)
-    d.text(((W - tw(d, title, tf)) / 2, 2), title, font=tf, fill=INK)
-    rule(d, MARGIN, 57, W - MARGIN, 3)
-    d.text((MARGIN, 62), "Sunday 22 November 2026",
-           font=f(SANSB, 13), fill=INK)
-    right = "64 verified stories — reported Sunday 22 Nov 2026"
-    d.text((W - MARGIN - tw(d, right, f(SANS, 12)), 63), right,
-           font=f(SANS, 12), fill=MUTED)
-    rule(d, MARGIN, 79, W - MARGIN, 2)
+    tf = f(SERIFB, 38)
+    d.text(((W - tw(d, title, tf)) / 2, 0), title, font=tf, fill=INK)
+    rule(d, MARGIN, 44, W - MARGIN, 3)
+    d.text((MARGIN, 49), "Sunday 22 November 2026",
+           font=f(SANSB, 12), fill=INK)
+    right = f"{total} verified stories — reported Sunday 22 Nov 2026"
+    d.text((W - MARGIN - tw(d, right, f(SANS, 11)), 50), right,
+           font=f(SANS, 11), fill=MUTED)
+    rule(d, MARGIN, 66, W - MARGIN, 2)
 
     # key-numbers strip
-    stats_strip(d, (MARGIN, 85, W - MARGIN, 114), STATS)
+    stats_strip(d, (MARGIN, 70, W - MARGIN, 98), STATS)
 
-    # lead row: 3 panels with full scene art, almost twice as tall
-    top = 120
+    # lead row: 3 art-first cards, scenes 190 tall, bold 19pt headlines
+    top = 102
     lw = (W - 2 * MARGIN - 2 * 10) // 3
-    lh = 274
+    lh = 320
     for i, (art, head, deck, src, _region) in enumerate(LEADS):
         x0 = MARGIN + i * (lw + 10)
         lead_panel(img, d, (x0, top, x0 + lw, top + lh), i + 1, art, head,
                    deck, src)
 
-    # mini rows: 2 x 5, a notch shorter than revision 4
-    my = top + lh + 5
-    mw = (W - 2 * MARGIN - 4 * 8) // 5
-    mh = 96
-    for r in range(2):
-        for c in range(5):
-            i = r * 5 + c
-            art, head, deck, src, _region = MINIS[i]
-            x0 = MARGIN + c * (mw + 8)
-            y0 = my + r * (mh + 5)
-            mini_panel(img, d, (x0, y0, x0 + mw, y0 + mh), i + 4, art, head,
-                       deck, src)
+    # illustrated panels: 4 x 3 grid of native-size scenes, stories 4-15
+    py = top + lh + 6
+    pw = (W - 2 * MARGIN - 3 * 8) // 4
+    ph = 104
+    for r in range(3):
+        for c in range(4):
+            i = r * 4 + c
+            art, head, src, _region = PANELS[i]
+            x0 = MARGIN + c * (pw + 8)
+            y0 = py + r * (ph + 6)
+            feature_panel(img, d, (x0, y0, x0 + pw, y0 + ph), i + 4, art,
+                          head, src)
+    pbot = py + 3 * ph + 2 * 6
 
-    # map strip, slightly lower than revision 4
-    mapy = my + 2 * mh + 5 + 5
-    draw_map(d, (MARGIN, mapy, W - MARGIN, mapy + 48))
-
-    # index: three balanced columns, stories 14-54, each with its source
-    iy = mapy + 48 + 7
-    d.text((MARGIN, iy), "ALSO TODAY — INDEX 14–54",
-           font=f(SANSB, 13), fill=INK)
+    # index header, with the computed regions bar on the same line
+    iy = pbot + 8
+    last = len(LEADS) + len(PANELS)
+    d.text((MARGIN, iy), f"ALSO TODAY — INDEX {last + 1}–{total}",
+           font=f(SANSB, 12.5), fill=INK)
     bar = regions_bar()
-    bfn_bar = f(SANSB, 10)
+    bfn_bar = f(SANSB, 9.5)
     d.text((W - MARGIN - tw(d, bar, bfn_bar), iy + 2), bar,
            font=bfn_bar, fill=MUTED)
     rule(d, MARGIN, iy + 18, W - MARGIN, 2)
-    ifn = f(SANS, 8.5)
-    icolw = (W - 2 * MARGIN - 2 * 14) // 3
-    icols = flow_columns(d, INDEX, 14, ifn, icolw, 3)
-    ibot = draw_flow(d, icols, MARGIN, iy + 24, icolw, 14, ifn, 9.2,
-                     item_gap=0.5)
 
-    # in brief: two columns of one-liners, stories 55-64, each with its source
-    by = ibot + 7
-    d.text((MARGIN, by), "IN BRIEF — THE REST OF THE DAY IN ONE LINE EACH",
-           font=f(SANSB, 12), fill=INK)
-    rule(d, MARGIN, by + 17, W - MARGIN, 2)
-    bfn = f(SANS, 8.5)
-    bcolw = (W - 2 * MARGIN - 24) // 2
-    bcols = flow_columns(d, BRIEFS, 55, bfn, bcolw, 2)
-    bbot = draw_flow(d, bcols, MARGIN, by + 23, bcolw, 24, bfn, 9.2,
-                     item_gap=0.5)
+    # index: four balanced columns at a readable 10.5pt
+    ifn = f(SANS, 10.5)
+    icolw = (W - 2 * MARGIN - 3 * 12) // 4
+    icols = flow_columns(d, INDEX, last + 1, ifn, icolw, 4)
+    ibot = draw_flow(d, icols, MARGIN, iy + 24, icolw, 12, ifn, 12.6,
+                     item_gap=1.0)
 
     # date check box
-    cby = bbot + 7
-    date_check(d, (MARGIN, cby, W - MARGIN, cby + 30), DATE_CHECK_TEXT)
+    cby = ibot + 8
+    date_check(d, (MARGIN, cby, W - MARGIN, cby + 29), DATE_CHECK_TEXT)
 
     # footer
     d.text((MARGIN, cby + 34),
            "Every story dated & sourced — checked Sunday 22 Nov 2026. "
-           "Full source list on file for all 64 stories; claims are "
+           f"Full source list on file for all {total} stories; claims are "
            "labelled as claims; market figures are Friday's closes. "
            "All pictures drawn in code.",
-           font=f(SANS, 8.5), fill=MUTED)
+           font=f(SANS, 8), fill=MUTED)
 
     if os.environ.get("RENDER_DEBUG"):
-        print(f"index_bottom={ibot:.0f} briefs_bottom={bbot:.0f} "
-              f"datebox_bottom={cby + 30} footer_y={cby + 34}")
+        print(f"panels_bottom={pbot:.0f} index_bottom={ibot:.0f} "
+              f"datebox_bottom={cby + 29:.0f} footer_y={cby + 34:.0f} "
+              f"stories={total} regions={regions_bar()}")
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
     img.save(OUT, format="PNG", optimize=True)

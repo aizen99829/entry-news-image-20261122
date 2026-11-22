@@ -4,20 +4,16 @@
 // output directory. Standard library only, no network access. The output
 // directory comes from MAKEFUN_OUTPUT_DIR, defaulting to /output.
 // The poster bytes are fixed, so every run writes identical output.
-// Revision 2 packs the page denser: 64 verified stories (three leads, ten
-// illustrated panels, a 41-item index and a ten-line IN BRIEF strip).
-// Revision 3 polishes the layout (no orphan lines), re-verifies the
-// Ukraine and COP31 leads, and adds a regions line and a dated-and-sourced
-// footer.
-// Revision 4 adds full scene illustrations for the three leads, richer
-// panel art, the source outlet named on every story, a key-numbers
-// strip, a regions bar with counts computed from the story list, and a
-// DATE CHECK box fencing off other days' news.
-// Revision 5 is an art pass only: the lead scenes are drawn more than
-// twice as tall and much deeper (halos, searchlights, reflections,
-// smoke, chandeliers, more delegates), the panel art sits under the
-// same soft top light, and the space is funded by tighter layout
-// elsewhere. The 64 stories and every word are unchanged.
+// Revision 2 packed the page denser (64 stories); revision 3 polished
+// the layout and re-verified the leads; revision 4 added full scene
+// illustrations, per-story sources, a key-numbers strip, a computed
+// regions bar and a DATE CHECK box; revision 5 deepened the lead art.
+// Revision 6 changes direction: an art-led front page of 40 stories —
+// three large lead scenes under 19pt headlines, twelve illustrated
+// panels with bold headlines and native-size scenes, and a readable
+// 10.5pt index for the rest. Every kept story keeps its verified
+// wording and source tag; the regions bar is computed from the final
+// 40-story list.
 
 import { copyFileSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
