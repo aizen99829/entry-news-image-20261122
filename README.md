@@ -13,9 +13,11 @@ IN BRIEF strip of ten one-line stories numbered 55-64.
 
 Lead stories: Iran claiming new strikes on US Patriot radars in Bahrain
 as the Gulf confrontation widens, Zelensky calling the Crimea bridge
-strikes a 'fair response' as Russia hits Lviv, and the COP31 climate
-talks deadlocked over fossil fuels. Claims are labelled as claims on
-the poster; market figures are Friday's closes, reported on Sunday.
+strikes a 'fair response' as Russia answers with a 400-drone barrage,
+and COP31's final text omitting fossil fuels ahead of a Sunday vote.
+Every story is dated and sourced — checked Sunday 22 November 2026;
+claims are labelled as claims on the poster; market figures are
+Friday's closes, reported on Sunday.
 
 ## Files
 

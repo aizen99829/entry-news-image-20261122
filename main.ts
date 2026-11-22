@@ -6,6 +6,9 @@
 // The poster bytes are fixed, so every run writes identical output.
 // Revision 2 packs the page denser: 64 verified stories (three leads, ten
 // illustrated panels, a 41-item index and a ten-line IN BRIEF strip).
+// Revision 3 polishes the layout (no orphan lines), re-verifies the
+// Ukraine and COP31 leads, and adds a regions line and a dated-and-sourced
+// footer.
 
 import { copyFileSync, mkdirSync } from "node:fs";
 import { join } from "node:path";

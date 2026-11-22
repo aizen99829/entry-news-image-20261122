@@ -1,12 +1,14 @@
 """Render The Daily Compass front page for Sunday 22 November 2026.
 
-Revision 2 (denser edition): the same newspaper front page packed tighter —
-smaller body type, tighter leading, a three-column index and a rapid-fire
-IN BRIEF strip — so one 1024x1024 page now carries 64 verified stories:
-three lead panels, ten smaller illustrated panels, a schematic world map
-with numbered pins 1-13, a numbered index for stories 14-54, and ten
-one-line briefs numbered 55-64. Output is deterministic: the same code
-always writes byte-identical PNG bytes.
+Revision 3 (layout polish + re-verified leads): the denser edition of
+revision 2 — 64 verified stories: three lead panels, ten smaller
+illustrated panels, a schematic world map with numbered pins 1-13, a
+numbered index for stories 14-54, and ten one-line briefs numbered
+55-64 — with the wrapping cleaned up so no item ends on a lone orphan
+word, the Ukraine and COP31 leads updated to the latest reporting, a
+regions line under the index header, and a stronger dated-and-sourced
+line in the footer. Output is deterministic: the same code always
+writes byte-identical PNG bytes.
 """
 
 from pathlib import Path
@@ -66,6 +68,18 @@ def wrap(d, text, font, maxw):
             cur = word
     if cur:
         lines.append(cur)
+    # Orphan fix: never leave a lone word or number on the last line —
+    # pull the previous line's last word down to join it when it fits.
+    while len(lines) >= 2:
+        last_words = lines[-1].split()
+        prev_words = lines[-2].split()
+        if len(last_words) > 1 or len(prev_words) < 2:
+            break
+        joined = prev_words[-1] + " " + lines[-1]
+        if tw(d, joined, font) > maxw:
+            break
+        lines[-2] = " ".join(prev_words[:-1])
+        lines[-1] = joined
     return lines
 
 
@@ -395,12 +409,12 @@ LEADS = [
      "bases. Bahrain probes a Patriot interceptor crash."),
     ("bridge",
      "Zelensky: Crimea bridge strikes a 'fair response'",
-     "Kyiv acted after 109 Russian aerial attacks on bridges, he says. "
-     "Russia hits Lviv: 2 killed, 10 hurt."),
+     "Russia replied with 400+ drones and 110 missiles in one night: "
+     "nine killed, three Kyiv bridges hit, Lviv station struck."),
     ("climate",
-     "COP31 deadlocked as fossil-fuel fight drags on",
-     "Climate talks in Turkey run into overtime with no deal in sight, as "
-     "countries split over the future of fossil fuels and finance."),
+     "COP31 final text omits fossil fuels; vote due Sunday",
+     "After double overtime in Antalya, the presidency's 10-page package "
+     "drops phase-out language; EU and island states object."),
 ]
 
 MINIS = [
@@ -564,6 +578,9 @@ def build():
     iy = mapy + 80 + 8
     d.text((MARGIN, iy), "ALSO TODAY — INDEX 14–54",
            font=f(SANSB, 13), fill=INK)
+    regions = "REGIONS: MIDDLE EAST · EUROPE · ASIA-PACIFIC · AMERICAS · AFRICA · GLOBAL"
+    d.text((W - MARGIN - tw(d, regions, f(SANS, 10)), iy + 2), regions,
+           font=f(SANS, 10), fill=MUTED)
     rule(d, MARGIN, iy + 18, W - MARGIN, 2)
     ifn = f(SANS, 10)
     icolw = (W - 2 * MARGIN - 2 * 20) // 3
@@ -584,8 +601,9 @@ def build():
     foot = bbot + 8
     rule(d, MARGIN, foot, W - MARGIN, 1)
     d.text((MARGIN, foot + 5),
-           "Sources on file for every story. Claims are labelled as claims; "
-           "market figures are Friday's closes, reported Sunday 22 November 2026.",
+           "Every story dated & sourced — checked Sunday 22 Nov 2026. "
+           "Sources on file for all 64 stories; claims are labelled as "
+           "claims; market figures are Friday's closes.",
            font=f(SANS, 10), fill=MUTED)
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
