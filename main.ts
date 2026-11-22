@@ -13,6 +13,11 @@
 // panel art, the source outlet named on every story, a key-numbers
 // strip, a regions bar with counts computed from the story list, and a
 // DATE CHECK box fencing off other days' news.
+// Revision 5 is an art pass only: the lead scenes are drawn more than
+// twice as tall and much deeper (halos, searchlights, reflections,
+// smoke, chandeliers, more delegates), the panel art sits under the
+// same soft top light, and the space is funded by tighter layout
+// elsewhere. The 64 stories and every word are unchanged.
 
 import { copyFileSync, mkdirSync } from "node:fs";
 import { join } from "node:path";

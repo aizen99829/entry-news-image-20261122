@@ -31,6 +31,20 @@ Asia-Pacific 9, Americas 19, Africa 3, Global 8), and a DATE CHECK
 box that fences off other days' news (the Peru earthquake of 20 Nov
 and the Poland missile falls of 21 Nov are deliberately left out).
 
+Revision 5 (art focus) changes no words: the three lead scenes are
+drawn more than twice as tall and much deeper — a dusk-to-night Gulf
+coast with a haloed moon, searchlight beams, a detailed phased-array
+radar and dish, two incoming missile arcs and light reflecting on
+the sea; a taller two-layer skyline under glowing missile trails,
+seven drones, three haloed explosions with smoke plumes and a lit
+river bridge; and a warmer COP31 hall with chandeliers, banners, a
+graticule globe, eight delegates with papers and water glasses, and
+larger near-side delegates seen from behind. The panel pictograms
+sit under the same soft top light. The space comes from a tighter
+masthead and stats strip, shorter mini panels, a lower map strip
+and a notch tighter index and brief type; all 64 stories, every
+source tag, the regions bar and the DATE CHECK box are unchanged.
+
 ## Files
 
 - `main.ts` — stdlib-only entrypoint (Node 22). Copies `assets/poster.png`

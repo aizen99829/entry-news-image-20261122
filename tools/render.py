@@ -1,16 +1,17 @@
 """Render The Daily Compass front page for Sunday 22 November 2026.
 
-Revision 4 (chase the top entry): keeps revision 3's 64 verified
-stories, corrected Ukraine and COP31 leads and orphan-free wrapping,
-and adds the devices a front page needs to compete at the top of the
-board, in this paper's own design and voice: full scene
-illustrations for the three leads (a Gulf radar base under fire on a
-night coast, a drone-and-missile barrage over a city skyline and
-river bridge, a climate-conference hall with globe, clock and
-delegates), richer panel art, the source outlet named on every one
-of the 64 stories, a key-numbers strip under the masthead, a regions
-bar whose counts are computed from the story list itself, and a
-DATE CHECK box that fences off other days' news. Output is
+Revision 5 (art focus): the content of revision 4 is frozen — the
+same 64 verified stories, corrected Ukraine and COP31 leads,
+orphan-free wrapping, source outlet on every story, key-numbers
+strip, computed regions bar and DATE CHECK box. What changes is the
+artwork: the three lead scenes are drawn almost twice as tall and
+much deeper (layered sky gradients, moon and burst halos, searchlight
+beams, a sea with light reflections, a taller two-layer skyline with
+glowing missile trails and smoke, a warmer conference hall with
+banners, chandeliers and more delegates), and the panel pictograms
+sit under the same soft top light. The space comes from a slightly
+tighter masthead and stats strip, shorter mini panels, a lower map
+strip and a notch tighter index and brief type. Output is
 deterministic: the same code always writes byte-identical PNG bytes.
 """
 
@@ -164,6 +165,28 @@ def burst(d, cx, cy, r, col1, col2):
         d.polygon(pts, fill=col)
 
 
+def halo(d, cx, cy, r, cols):
+    """Concentric glow: cols runs from the faintest outer ring inward."""
+    n = len(cols)
+    for i, col in enumerate(cols):
+        rr = r * (n - i) / n
+        d.ellipse([cx - rr, cy - rr, cx + rr, cy + rr], fill=col)
+
+
+def glow_line(d, p0, p1, glow, core, wglow=5, wcore=2):
+    """A line with a dim wide under-stroke and a bright core."""
+    d.line([p0, p1], fill=glow, width=wglow)
+    d.line([p0, p1], fill=core, width=wcore)
+
+
+def refl(d, x, y, w, col, n=3, gap=3, lh=2):
+    """Short stacked light streaks, as on water at night."""
+    for i in range(n):
+        yy = y + i * (lh + gap)
+        inset = (i % 2) * 2
+        d.line([(x + inset, yy), (x + w - inset, yy)], fill=col, width=lh)
+
+
 def arc_pts(p0, p1, p2, n=16):
     pts = []
     for i in range(n + 1):
@@ -191,169 +214,243 @@ def starfield(d, x, y, w, h, n, seed, frac=0.6):
 
 def scene_radar(d, x, y, w, h):
     """Gulf coast at night: a Patriot-style radar and radome under fire."""
-    vgrad(d, x, y, w, h, (13, 17, 34), (54, 66, 98))
-    starfield(d, x, y, w, h, 34, 11)
-    circle(d, x + w - 24, y + 13, 6, (228, 232, 240))
-    gy = y + h - 14
+    vgrad(d, x, y, w, h, (10, 14, 30), (58, 72, 108), steps=26)
+    starfield(d, x, y, w, h, 48, 11, frac=0.5)
+    # moon with a soft halo, top right
+    mx0, my0 = x + w - 34, y + 22
+    halo(d, mx0, my0, 17, [(50, 60, 86), (64, 76, 102), (82, 94, 120)])
+    circle(d, mx0, my0, 8, (233, 237, 245))
+    circle(d, mx0 - 3, my0 - 2, 2, (200, 206, 218))
+    circle(d, mx0 + 2, my0 + 3, 1, (200, 206, 218))
+    gy = y + h - 24
+    # searchlight beams fanning up from the radar position
+    bx0 = x + int(w * 0.24)
+    d.polygon([(bx0, gy - 52), (x + int(w * 0.02), y + 4),
+               (x + int(w * 0.13), y + 2)], fill=(50, 60, 86))
+    d.polygon([(bx0, gy - 52), (x + int(w * 0.44), y + 2),
+               (x + int(w * 0.55), y + 6)], fill=(46, 56, 82))
+    # the sea in the foreground
+    vgrad(d, x, gy, w, h - (gy - y), (20, 32, 52), (9, 15, 28), steps=8)
     g = lcg(31)
-    # shore installations with lit windows
-    for bx, bw, bh in ((0.05, 0.10, 0.18), (0.79, 0.12, 0.22), (0.92, 0.06, 0.14)):
-        bx0 = x + int(w * bx)
-        bw0 = int(w * bw)
-        bh0 = int(h * bh)
-        d.rectangle([bx0, gy - bh0, bx0 + bw0, gy], fill=(8, 10, 14))
-        for wy in range(gy - bh0 + 3, gy - 3, 6):
-            for wx in range(bx0 + 3, bx0 + bw0 - 2, 7):
-                if next(g) % 3 == 0:
+    # shore installations with lit windows, standing on the coast line
+    for bx, bw, bh in ((0.03, 0.09, 0.30), (0.115, 0.055, 0.21),
+                       (0.80, 0.10, 0.36), (0.915, 0.065, 0.25)):
+        bx1 = x + int(w * bx)
+        bw1 = int(w * bw)
+        bh1 = int(h * bh)
+        d.rectangle([bx1, gy - bh1, bx1 + bw1, gy], fill=(8, 10, 14))
+        for wy in range(gy - bh1 + 3, gy - 3, 5):
+            for wx in range(bx1 + 3, bx1 + bw1 - 2, 6):
+                if next(g) % 2 == 0:
                     d.rectangle([wx, wy, wx + 2, wy + 2], fill=(244, 200, 92))
-    # radome on its plinth
+    # radome on its plinth, with panel seams
     dx0 = x + int(w * 0.60)
-    d.rectangle([dx0, gy - 7, dx0 + 34, gy], fill=(52, 56, 64))
-    d.pieslice([dx0 - 2, gy - 28, dx0 + 36, gy + 6], 180, 360,
-               fill=(206, 210, 214))
-    # phased-array radar panel on a trailer
-    rx = x + int(w * 0.15)
-    d.rectangle([rx, gy - 9, rx + 46, gy - 3], fill=(74, 79, 88))
-    circle(d, rx + 10, gy - 3, 3, (30, 32, 38))
-    circle(d, rx + 36, gy - 3, 3, (30, 32, 38))
-    d.polygon([(rx + 8, gy - 11), (rx + 16, gy - 38), (rx + 52, gy - 32),
-               (rx + 44, gy - 5)], fill=(148, 156, 166), outline=(30, 32, 38))
-    for i in range(4):
-        for j in range(3):
-            px = rx + 17 + i * 8 - j * 2
-            py = gy - 33 + j * 8 + i
-            d.ellipse([px, py, px + 3, py + 3], fill=(96, 104, 114))
-    # surveillance mast with a rotating bar
-    mx = rx + 68
-    d.line([(mx, gy), (mx, gy - 28)], fill=(120, 126, 134), width=2)
-    d.line([(mx - 9, gy - 29), (mx + 9, gy - 32)], fill=(182, 188, 196), width=3)
-    # ground line
-    d.rectangle([x, gy, x + w, y + h], fill=(15, 17, 21))
-    d.line([(x, gy), (x + w, gy)], fill=(96, 102, 114), width=1)
-    # incoming missile on an arc from the top-right corner
-    pts = arc_pts((x + w - 6, y + 3), (x + int(w * 0.62), y + 1),
-                  (x + int(w * 0.47), y + int(h * 0.36)))
+    d.rectangle([dx0, gy - 9, dx0 + 46, gy], fill=(52, 56, 64))
+    d.pieslice([dx0 - 3, gy - 54, dx0 + 49, gy + 8], 180, 360,
+               fill=(208, 212, 216))
+    d.arc([dx0 + 6, gy - 44, dx0 + 40, gy + 2], 180, 360, fill=(168, 174, 180))
+    d.line([(dx0 + 23, gy - 50), (dx0 + 23, gy)], fill=(168, 174, 180), width=1)
+    # phased-array radar panel on a trailer, elements in a 6x4 grid
+    rx = x + int(w * 0.13)
+    d.rectangle([rx, gy - 10, rx + 58, gy - 3], fill=(74, 79, 88))
+    circle(d, rx + 12, gy - 3, 3, (30, 32, 38))
+    circle(d, rx + 46, gy - 3, 3, (30, 32, 38))
+    d.polygon([(rx + 6, gy - 12), (rx + 16, gy - 64), (rx + 66, gy - 55),
+               (rx + 56, gy - 6)], fill=(150, 158, 168), outline=(30, 32, 38))
+    for i in range(6):
+        for j in range(4):
+            px = rx + 20 + i * 7 - j * 2
+            py = gy - 57 + j * 11 + i // 3
+            col = (255, 190, 90) if (i + j) % 5 == 0 else (96, 104, 114)
+            d.ellipse([px, py, px + 3, py + 3], fill=col)
+    # surveillance dish on a mast, right of the radar
+    mx = rx + 96
+    d.line([(mx, gy), (mx, gy - 54)], fill=(120, 126, 134), width=2)
+    d.line([(mx - 7, gy - 18), (mx, gy - 30), (mx + 7, gy - 18)],
+           fill=(120, 126, 134), width=1)
+    d.pieslice([mx - 18, gy - 84, mx + 18, gy - 48], 300, 130,
+               fill=(198, 204, 210), outline=(30, 32, 38))
+    d.line([(mx, gy - 66), (mx + 13, gy - 76)], fill=(150, 156, 164), width=2)
+    circle(d, mx + 14, gy - 77, 3, (210, 216, 222))
+    # coast line
+    d.line([(x, gy), (x + w, gy)], fill=(110, 120, 132), width=1)
+    # two incoming missiles on arcs from the top-right
+    pts = arc_pts((x + w - 6, y + 3), (x + int(w * 0.66), y + 1),
+                  (x + int(w * 0.55), y + int(h * 0.33)))
     dot_trail(d, pts, (255, 150, 54), 2, 2)
     hx, hy = pts[-1]
-    d.polygon([(hx, hy), (hx - 9, hy - 4), (hx - 2, hy + 5)],
+    halo(d, hx, hy, 7, [(120, 70, 30), (200, 110, 40)])
+    d.polygon([(hx, hy), (hx - 10, hy - 5), (hx - 2, hy + 6)],
               fill=(255, 214, 120))
-    # interceptor rising from the radar to a burst
-    bx, by = x + int(w * 0.40), y + int(h * 0.30)
-    pts2 = arc_pts((rx + 30, gy - 12), (x + int(w * 0.29), y + int(h * 0.26)),
-                   (bx, by), 14)
+    pts3 = arc_pts((x + w - 44, y + 2), (x + int(w * 0.82), y + int(h * 0.10)),
+                   (x + int(w * 0.74), y + int(h * 0.30)))
+    dot_trail(d, pts3, (255, 170, 80), 2, 2)
+    hx3, hy3 = pts3[-1]
+    d.polygon([(hx3, hy3), (hx3 - 8, hy3 - 4), (hx3 - 1, hy3 + 5)],
+              fill=(255, 200, 110))
+    # interceptor rising from the radar to a haloed burst
+    bx, by = x + int(w * 0.42), y + int(h * 0.28)
+    pts2 = arc_pts((rx + 36, gy - 58), (x + int(w * 0.28), y + int(h * 0.20)),
+                   (bx, by), 18)
     dot_trail(d, pts2, (240, 226, 170), 2, 2)
-    burst(d, bx, by, 12, (238, 128, 34), (252, 224, 130))
+    halo(d, bx, by, 24, [(110, 60, 26), (160, 84, 30)])
+    burst(d, bx, by, 15, (238, 128, 34), (252, 224, 130))
+    # light reflections on the water
+    refl(d, bx - 15, gy + 5, 30, (150, 96, 44), n=3)
+    refl(d, mx0 - 13, gy + 4, 26, (118, 128, 148), n=4)
+    refl(d, x + int(w * 0.82), gy + 6, 22, (96, 82, 48), n=2)
 
 
 def scene_barrage(d, x, y, w, h):
     """Night barrage over a city skyline, a river and its bridge."""
-    vgrad(d, x, y, w, h, (8, 10, 24), (46, 46, 72))
-    starfield(d, x, y, w, h, 22, 23, frac=0.4)
+    vgrad(d, x, y, w, h, (6, 8, 20), (50, 50, 78), steps=26)
+    starfield(d, x, y, w, h, 26, 23, frac=0.35)
     g = lcg(47)
-    base = y + h - 13
-    # far skyline
+    base = y + h - 18
+    # far skyline, taller now the scene has room to breathe
     fx = x + 4
     while fx < x + w - 12:
         bw = 14 + next(g) % 16
-        bh = 14 + next(g) % 13
+        bh = int(h * 0.22) + next(g) % int(h * 0.20)
         d.rectangle([fx, base - bh, fx + bw, base], fill=(30, 32, 46))
         fx += bw + 3
-    # near skyline with lit windows
+    # near skyline with many lit windows
     nx = x + 2
     while nx < x + w - 14:
         bw = 18 + next(g) % 20
-        bh = 22 + next(g) % 17
+        bh = int(h * 0.34) + next(g) % int(h * 0.28)
         d.rectangle([nx, base - bh, nx + bw, base], fill=(13, 14, 21))
-        for _ in range(3):
+        for _ in range(6):
             wx = nx + 3 + next(g) % max(bw - 6, 1)
             wy = base - bh + 3 + next(g) % max(bh - 6, 1)
             d.rectangle([wx, wy, wx + 2, wy + 2], fill=(246, 202, 94))
         nx += bw + 4
-    # explosions above the rooftops
-    burst(d, x + int(w * 0.30), y + int(h * 0.30), 11,
-          (240, 140, 40), (252, 226, 140))
-    burst(d, x + int(w * 0.68), y + int(h * 0.22), 8,
-          (240, 140, 40), (252, 226, 140))
-    # smoke drifting off a rooftop
-    d.ellipse([x + int(w * 0.55), base - 25, x + int(w * 0.55) + 24, base - 17],
-              fill=(74, 74, 82))
-    d.ellipse([x + int(w * 0.55) + 14, base - 29, x + int(w * 0.55) + 32,
-               base - 22], fill=(88, 88, 96))
-    # descending missile streaks
-    for sx, ex in ((0.16, 0.30), (0.52, 0.65), (0.84, 0.93)):
+    # explosions above the rooftops, haloed
+    for fx_, fy_, r in ((0.28, 0.36, 13), (0.66, 0.27, 10), (0.86, 0.47, 8)):
+        ex, ey = x + int(w * fx_), y + int(h * fy_)
+        halo(d, ex, ey, int(r * 1.9), [(104, 56, 24), (150, 80, 28)])
+        burst(d, ex, ey, r, (240, 140, 40), (252, 226, 140))
+    # smoke plumes drifting off three rooftops
+    for sx_, sy_, sw in ((0.52, 0.60, 30), (0.16, 0.55, 22), (0.74, 0.66, 26)):
+        sx0, sy0 = x + int(w * sx_), base - int(h * sy_)
+        for k in range(3):
+            d.ellipse([sx0 + k * 9, sy0 - k * 6, sx0 + k * 9 + sw - k * 5,
+                       sy0 - k * 6 + 11], fill=(70 + k * 8, 70 + k * 8, 80 + k * 8))
+    # descending missile streaks with glow trails
+    for sx, ex, ey_ in ((0.14, 0.27, 0.55), (0.40, 0.50, 0.62),
+                        (0.58, 0.68, 0.50), (0.82, 0.92, 0.58)):
         p0 = (x + int(w * sx), y + 3)
-        p1 = (x + int(w * ex), y + int(h * 0.52))
-        pts = [(p0[0] + (p1[0] - p0[0]) * t / 10,
-                p0[1] + (p1[1] - p0[1]) * t / 10) for t in range(11)]
-        dot_trail(d, pts, (255, 176, 64), 2, 1)
-        d.ellipse([p1[0] - 3, p1[1] - 3, p1[0] + 3, p1[1] + 3],
-                  fill=(255, 226, 150))
-    # drones: small crosses with a red eye
-    for fx_, fy_ in ((0.24, 0.18), (0.46, 0.12), (0.76, 0.15), (0.60, 0.30)):
+        p1 = (x + int(w * ex), y + int(h * ey_))
+        glow_line(d, p0, p1, (122, 70, 28), (255, 190, 84), 5, 2)
+        halo(d, p1[0], p1[1], 6, [(140, 82, 30), (210, 130, 44)])
+        circle(d, p1[0], p1[1], 2, (255, 232, 160))
+    # drones at varied sizes and depths: an X body with a red eye
+    for fx_, fy_, s in ((0.20, 0.20, 8), (0.34, 0.13, 6), (0.47, 0.22, 9),
+                        (0.60, 0.10, 5), (0.72, 0.19, 7), (0.86, 0.12, 6),
+                        (0.93, 0.30, 5)):
         cx, cy = x + int(w * fx_), y + int(h * fy_)
-        d.line([(cx - 6, cy - 4), (cx + 6, cy + 4)], fill=(122, 126, 138), width=2)
-        d.line([(cx - 6, cy + 4), (cx + 6, cy - 4)], fill=(122, 126, 138), width=2)
-        circle(d, cx, cy, 2, (206, 62, 50))
-    # river and bridge silhouette
-    d.rectangle([x, base, x + w, y + h], fill=(18, 32, 54))
-    deck = base + 3
+        d.line([(cx - s, cy - s * 2 // 3), (cx + s, cy + s * 2 // 3)],
+               fill=(126, 130, 142), width=2)
+        d.line([(cx - s, cy + s * 2 // 3), (cx + s, cy - s * 2 // 3)],
+               fill=(126, 130, 142), width=2)
+        circle(d, cx, cy, 2, (216, 66, 52))
+    # river and bridge silhouette, with reflections under the lamps
+    vgrad(d, x, base, w, h - (base - y), (16, 30, 52), (8, 14, 28), steps=6)
+    deck = base + 4
     for tx_ in (x + int(w * 0.33), x + int(w * 0.66)):
-        d.line([(tx_, deck - 12), (tx_, deck + 2)], fill=(4, 5, 8), width=3)
-        d.line([(tx_, deck - 12), (tx_ - 16, deck)], fill=(4, 5, 8), width=1)
-        d.line([(tx_, deck - 12), (tx_ + 16, deck)], fill=(4, 5, 8), width=1)
+        d.line([(tx_, deck - 20), (tx_, deck + 3)], fill=(4, 5, 8), width=3)
+        d.line([(tx_, deck - 20), (tx_ - 22, deck)], fill=(4, 5, 8), width=1)
+        d.line([(tx_, deck - 20), (tx_ + 22, deck)], fill=(4, 5, 8), width=1)
+        d.line([(tx_, deck - 20), (tx_ - 10, deck)], fill=(4, 5, 8), width=1)
+        d.line([(tx_, deck - 20), (tx_ + 10, deck)], fill=(4, 5, 8), width=1)
     d.line([(x + 2, deck), (x + w - 2, deck)], fill=(4, 5, 8), width=3)
-    for i in range(6):
-        lx = x + 12 + i * (w - 24) // 5
+    for i in range(7):
+        lx = x + 12 + i * (w - 24) // 6
         d.ellipse([lx, deck - 2, lx + 2, deck], fill=(255, 220, 140))
+        refl(d, lx - 2, deck + 4, 6, (96, 84, 44), n=2, gap=2)
+    refl(d, x + int(w * 0.28) - 12, base + 3, 24, (110, 70, 30), n=2)
+    refl(d, x + int(w * 0.66) - 10, base + 6, 20, (100, 64, 28), n=2)
 
 
 def scene_conference(d, x, y, w, h):
     """A climate-conference hall: globe, clock at 03:00, long table, delegates."""
-    vgrad(d, x, y, w, h, (238, 228, 202), (219, 205, 172), steps=10)
-    # globe on the back wall
-    gx, gy = x + int(w * 0.27), y + 23
-    circle(d, gx, gy, 16, (74, 142, 192), outline=(52, 96, 140), width=2)
-    d.ellipse([gx - 11, gy - 8, gx - 2, gy + 1], fill=GREEN)
-    d.ellipse([gx + 1, gy + 3, gx + 12, gy + 11], fill=GREEN)
-    d.ellipse([gx + 4, gy - 12, gx + 12, gy - 5], fill=GREEN)
+    vgrad(d, x, y, w, h, (242, 232, 206), (216, 198, 166), steps=18)
+    # chandeliers: a stem, a warm halo and a lit disc
+    for fx_ in (0.14, 0.50, 0.86):
+        cx = x + int(w * fx_)
+        d.line([(cx, y), (cx, y + 8)], fill=(120, 100, 64), width=2)
+        halo(d, cx, y + 13, 10, [(226, 208, 164), (236, 220, 182)])
+        circle(d, cx, y + 13, 4, (252, 240, 200), outline=(150, 124, 78))
+    # banners on the back wall, left and right
+    for bx, col, emb in ((x + 8, (52, 84, 128), WHITE),
+                         (x + w - 32, (44, 104, 74), (240, 220, 150))):
+        d.rectangle([bx, y + 6, bx + 24, y + 62], fill=col)
+        d.polygon([(bx, y + 62), (bx + 24, y + 62), (bx + 12, y + 54)],
+                  fill=col)
+        circle(d, bx + 12, y + 24, 7, None, outline=emb, width=2)
+        d.ellipse([bx + 8, y + 20, bx + 13, y + 26], fill=emb)
+    # globe on the back wall, with graticule arcs
+    gx, gy = x + int(w * 0.26), y + 38
+    d.ellipse([gx - 30, gy - 30, gx + 30, gy + 30], fill=(246, 238, 214))
+    circle(d, gx, gy, 24, (74, 142, 192), outline=(52, 96, 140), width=2)
+    d.ellipse([gx - 17, gy - 12, gx - 3, gy + 1], fill=GREEN)
+    d.ellipse([gx + 2, gy + 5, gx + 18, gy + 16], fill=GREEN)
+    d.ellipse([gx + 6, gy - 18, gx + 18, gy - 8], fill=GREEN)
+    d.ellipse([gx - 8, gy - 24, gx + 8, gy + 24], outline=(52, 96, 140))
+    d.ellipse([gx - 24, gy - 9, gx + 24, gy + 9], outline=(52, 96, 140))
+    d.line([(gx - 24, gy), (gx + 24, gy)], fill=(52, 96, 140), width=1)
     # wall clock reading 03:00 — the objections deadline
-    kx, ky = x + int(w * 0.73), y + 23
-    circle(d, kx, ky, 15, WHITE, outline=INK, width=2)
+    kx, ky = x + int(w * 0.74), y + 38
+    d.ellipse([kx - 27, ky - 27, kx + 27, ky + 27], fill=(246, 238, 214))
+    circle(d, kx, ky, 21, WHITE, outline=INK, width=2)
     for a in range(12):
         ang = math.pi * a / 6
-        d.line([(kx + 12 * math.cos(ang), ky + 12 * math.sin(ang)),
-                (kx + 14 * math.cos(ang), ky + 14 * math.sin(ang))],
+        r0, r1 = (15, 19) if a % 3 == 0 else (17, 19)
+        d.line([(kx + r0 * math.cos(ang), ky + r0 * math.sin(ang)),
+                (kx + r1 * math.cos(ang), ky + r1 * math.sin(ang))],
                fill=INK, width=1)
-    d.line([(kx, ky), (kx, ky - 9)], fill=INK, width=2)
-    d.line([(kx, ky), (kx + 8, ky)], fill=INK, width=2)
-    d.line([(kx, ky), (kx - 6, ky + 6)], fill=RED, width=1)
-    # the long table in perspective
-    ty = y + h - 24
-    d.polygon([(x + 24, y + h - 3), (x + w - 24, y + h - 3),
-               (x + int(w * 0.64), ty), (x + int(w * 0.36), ty)],
-              fill=(150, 110, 70))
-    d.line([(x + int(w * 0.36), ty), (x + int(w * 0.64), ty)],
+    d.line([(kx, ky), (kx, ky - 13)], fill=INK, width=2)
+    d.line([(kx, ky), (kx + 11, ky)], fill=INK, width=2)
+    d.line([(kx, ky), (kx - 8, ky + 9)], fill=RED, width=1)
+    # floor, then the long table in perspective with shaded bands
+    ty = y + h - 46
+    d.rectangle([x, ty + 18, x + w, y + h], fill=(158, 124, 80))
+    d.polygon([(x + 18, y + h - 2), (x + w - 18, y + h - 2),
+               (x + int(w * 0.66), ty), (x + int(w * 0.34), ty)],
+              fill=(146, 106, 66))
+    d.polygon([(x + 34, y + h - 8), (x + w - 34, y + h - 8),
+               (x + int(w * 0.64), ty + 4), (x + int(w * 0.36), ty + 4)],
+              fill=(160, 120, 76))
+    d.line([(x + int(w * 0.34), ty), (x + int(w * 0.66), ty)],
            fill=(110, 78, 44), width=2)
-    # delegates along the far side: shoulders, heads, name plates, microphones
+    # delegates along the far side: shoulders, heads, name plates,
+    # microphones, and for some a paper and a glass of water
     skins = [(233, 192, 152), (196, 142, 102), (122, 84, 58), (240, 205, 168)]
-    suits = [(38, 44, 66), (74, 60, 54), (52, 66, 52),
-             (86, 44, 48), (44, 52, 74), (64, 64, 64)]
-    n = 6
+    suits = [(38, 44, 66), (74, 60, 54), (52, 66, 52), (86, 44, 48),
+             (44, 52, 74), (64, 64, 64), (70, 52, 70), (54, 62, 78)]
+    n = 8
     for i in range(n):
-        cx = x + int(w * (0.16 + 0.68 * i / (n - 1)))
-        cy = ty - 5
-        d.pieslice([cx - 8, cy - 2, cx + 8, cy + 12], 180, 360,
+        cx = x + int(w * (0.10 + 0.80 * i / (n - 1)))
+        cy = ty - 6
+        d.pieslice([cx - 12, cy - 3, cx + 12, cy + 17], 180, 360,
                    fill=suits[i % len(suits)])
-        circle(d, cx, cy - 4, 4, skins[i % len(skins)])
-        d.rectangle([cx - 5, ty + 5, cx + 5, ty + 9], fill=(245, 243, 236))
-        d.line([(cx + 6, ty + 2), (cx + 9, cy + 2)], fill=(60, 56, 50), width=1)
-    # near-side delegates seen from behind
-    for cx, col in ((x + int(w * 0.10), (42, 34, 30)),
-                    (x + int(w * 0.90), (96, 74, 52)),
-                    (x + int(w * 0.24), (24, 24, 26))):
-        d.pieslice([cx - 15, y + h - 7, cx + 15, y + h + 15], 180, 360,
-                   fill=(36, 38, 46))
-        circle(d, cx, y + h - 1, 8, col)
+        circle(d, cx, cy - 6, 6, skins[i % len(skins)])
+        d.rectangle([cx - 6, ty + 6, cx + 6, ty + 11], fill=(245, 243, 236))
+        d.line([(cx + 8, ty + 3), (cx + 12, cy + 3)], fill=(60, 56, 50),
+               width=1)
+        if i % 3 == 0:
+            d.rectangle([cx - 13, ty + 15, cx - 3, ty + 20],
+                        fill=(248, 246, 238))
+        if i % 3 == 1:
+            d.rectangle([cx + 9, ty + 13, cx + 13, ty + 19],
+                        fill=(168, 196, 216))
+    # near-side delegates seen from behind, larger in the tall frame
+    for cx, col, suit in ((x + int(w * 0.07), (42, 34, 30), (36, 38, 46)),
+                          (x + int(w * 0.31), (24, 24, 26), (48, 42, 52)),
+                          (x + int(w * 0.93), (96, 74, 52), (40, 46, 40))):
+        d.pieslice([cx - 23, y + h - 15, cx + 23, y + h + 21], 180, 360,
+                   fill=suit)
+        circle(d, cx, y + h - 5, 10, col)
 
 
 SCENES = {
@@ -584,24 +681,44 @@ ART = {
 
 
 def draw_art(img, kind, x, y, w, h):
-    """Draw a pictogram at any size: render on a 100x100 tile, then scale."""
+    """Draw a pictogram at any size: render on a 100x100 tile, then scale.
+
+    A soft top light and a gentle foot shade are laid over the tile so
+    the flat pictograms sit under the same light as the lead scenes.
+    """
     tile = Image.new("RGB", (100, 100), PAPER)
     td = ImageDraw.Draw(tile)
     ART[kind](td, 0, 0, 100, 100)
     tile = tile.resize((w, h), Image.LANCZOS)
     img.paste(tile, (x, y))
+    light = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    ld = ImageDraw.Draw(light)
+    for j in range(h):
+        t = j / max(h - 1, 1)
+        ld.line([(0, j), (w, j)], fill=(255, 255, 255, int(30 * (1 - t))))
+    img.paste(light, (x, y), light)
+    shade = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    sd = ImageDraw.Draw(shade)
+    for j in range(h):
+        t = j / max(h - 1, 1)
+        sd.line([(0, j), (w, j)], fill=(20, 16, 8, int(22 * t)))
+    img.paste(shade, (x, y), shade)
 
 # --- panels, strips and boxes -------------------------------------------------
+
+LEAD_ART_H = 168
+
 
 def lead_panel(img, d, box, num, art, headline, deck, src):
     x0, y0, x1, y1 = box
     frame(d, box)
     ax0, ay0, ax1 = x0 + 2, y0 + 2, x1 - 2
-    SCENES[art](d, ax0, ay0, ax1 - ax0, 82)
-    d.line([(x0 + 2, y0 + 84), (x1 - 2, y0 + 84)], fill=EDGE, width=2)
+    SCENES[art](d, ax0, ay0, ax1 - ax0, LEAD_ART_H)
+    d.line([(x0 + 2, y0 + LEAD_ART_H + 2), (x1 - 2, y0 + LEAD_ART_H + 2)],
+           fill=EDGE, width=2)
     badge(d, x0 + 15, y0 + 15, num, r=12)
-    y = para(d, x0 + 9, y0 + 91, headline, f(SANSB, 16), x1 - x0 - 18, 19,
-             max_lines=3)
+    y = para(d, x0 + 9, y0 + LEAD_ART_H + 9, headline, f(SANSB, 16),
+             x1 - x0 - 18, 19, max_lines=3)
     para(d, x0 + 9, y + 1, deck, f(SANS, 11), x1 - x0 - 18, 13.5, max_lines=3)
     d.text((x0 + 9, y1 - 14), src, font=f(SANSB, 8), fill=MUTED)
 
@@ -609,14 +726,14 @@ def lead_panel(img, d, box, num, art, headline, deck, src):
 def mini_panel(img, d, box, num, art, headline, deck, src):
     x0, y0, x1, y1 = box
     frame(d, box)
-    ix, iy = x0 + 7, y0 + 6
-    draw_art(img, art, ix, iy, 48, 48)
-    d.rectangle([ix, iy, ix + 48, iy + 48], outline=EDGE, width=1)
-    badge(d, x0 + 12, y0 + 12, num, r=9)
-    tx = x0 + 62
-    para(d, tx, y0 + 5, headline, f(SANSB, 11), x1 - tx - 5, 13, max_lines=4)
-    para(d, x0 + 7, y0 + 58, deck, f(SANS, 10), x1 - x0 - 14, 11.5, max_lines=3)
-    d.text((x0 + 7, y1 - 12), src, font=f(SANSB, 8), fill=MUTED)
+    ix, iy = x0 + 6, y0 + 5
+    draw_art(img, art, ix, iy, 40, 40)
+    d.rectangle([ix, iy, ix + 40, iy + 40], outline=EDGE, width=1)
+    badge(d, x0 + 11, y0 + 11, num, r=9)
+    tx = x0 + 52
+    para(d, tx, y0 + 5, headline, f(SANSB, 11), x1 - tx - 5, 13, max_lines=3)
+    para(d, x0 + 6, y0 + 49, deck, f(SANS, 10), x1 - x0 - 12, 11, max_lines=3)
+    d.text((x0 + 6, y1 - 11), src, font=f(SANSB, 8), fill=MUTED)
 
 
 def stats_strip(d, box, stats):
@@ -947,47 +1064,47 @@ def build():
 
     # masthead
     title = "The Daily Compass"
-    tf = f(SERIFB, 46)
-    d.text(((W - tw(d, title, tf)) / 2, 3), title, font=tf, fill=INK)
-    rule(d, MARGIN, 60, W - MARGIN, 3)
-    d.text((MARGIN, 66), "Sunday 22 November 2026",
+    tf = f(SERIFB, 44)
+    d.text(((W - tw(d, title, tf)) / 2, 2), title, font=tf, fill=INK)
+    rule(d, MARGIN, 57, W - MARGIN, 3)
+    d.text((MARGIN, 62), "Sunday 22 November 2026",
            font=f(SANSB, 13), fill=INK)
     right = "64 verified stories — reported Sunday 22 Nov 2026"
-    d.text((W - MARGIN - tw(d, right, f(SANS, 12)), 67), right,
+    d.text((W - MARGIN - tw(d, right, f(SANS, 12)), 63), right,
            font=f(SANS, 12), fill=MUTED)
-    rule(d, MARGIN, 84, W - MARGIN, 2)
+    rule(d, MARGIN, 79, W - MARGIN, 2)
 
     # key-numbers strip
-    stats_strip(d, (MARGIN, 90, W - MARGIN, 120), STATS)
+    stats_strip(d, (MARGIN, 85, W - MARGIN, 114), STATS)
 
-    # lead row: 3 panels with full scene art
-    top = 126
+    # lead row: 3 panels with full scene art, almost twice as tall
+    top = 120
     lw = (W - 2 * MARGIN - 2 * 10) // 3
-    lh = 184
+    lh = 274
     for i, (art, head, deck, src, _region) in enumerate(LEADS):
         x0 = MARGIN + i * (lw + 10)
         lead_panel(img, d, (x0, top, x0 + lw, top + lh), i + 1, art, head,
                    deck, src)
 
-    # mini rows: 2 x 5
-    my = top + lh + 6
+    # mini rows: 2 x 5, a notch shorter than revision 4
+    my = top + lh + 5
     mw = (W - 2 * MARGIN - 4 * 8) // 5
-    mh = 108
+    mh = 96
     for r in range(2):
         for c in range(5):
             i = r * 5 + c
             art, head, deck, src, _region = MINIS[i]
             x0 = MARGIN + c * (mw + 8)
-            y0 = my + r * (mh + 6)
+            y0 = my + r * (mh + 5)
             mini_panel(img, d, (x0, y0, x0 + mw, y0 + mh), i + 4, art, head,
                        deck, src)
 
-    # map strip
-    mapy = my + 2 * mh + 6 + 6
-    draw_map(d, (MARGIN, mapy, W - MARGIN, mapy + 56))
+    # map strip, slightly lower than revision 4
+    mapy = my + 2 * mh + 5 + 5
+    draw_map(d, (MARGIN, mapy, W - MARGIN, mapy + 48))
 
     # index: three balanced columns, stories 14-54, each with its source
-    iy = mapy + 56 + 8
+    iy = mapy + 48 + 7
     d.text((MARGIN, iy), "ALSO TODAY — INDEX 14–54",
            font=f(SANSB, 13), fill=INK)
     bar = regions_bar()
@@ -995,29 +1112,29 @@ def build():
     d.text((W - MARGIN - tw(d, bar, bfn_bar), iy + 2), bar,
            font=bfn_bar, fill=MUTED)
     rule(d, MARGIN, iy + 18, W - MARGIN, 2)
-    ifn = f(SANS, 9)
+    ifn = f(SANS, 8.5)
     icolw = (W - 2 * MARGIN - 2 * 14) // 3
     icols = flow_columns(d, INDEX, 14, ifn, icolw, 3)
-    ibot = draw_flow(d, icols, MARGIN, iy + 24, icolw, 14, ifn, 9.8,
-                     item_gap=0.6)
+    ibot = draw_flow(d, icols, MARGIN, iy + 24, icolw, 14, ifn, 9.2,
+                     item_gap=0.5)
 
     # in brief: two columns of one-liners, stories 55-64, each with its source
-    by = ibot + 8
+    by = ibot + 7
     d.text((MARGIN, by), "IN BRIEF — THE REST OF THE DAY IN ONE LINE EACH",
            font=f(SANSB, 12), fill=INK)
     rule(d, MARGIN, by + 17, W - MARGIN, 2)
-    bfn = f(SANS, 9)
+    bfn = f(SANS, 8.5)
     bcolw = (W - 2 * MARGIN - 24) // 2
     bcols = flow_columns(d, BRIEFS, 55, bfn, bcolw, 2)
-    bbot = draw_flow(d, bcols, MARGIN, by + 23, bcolw, 24, bfn, 9.8,
-                     item_gap=0.6)
+    bbot = draw_flow(d, bcols, MARGIN, by + 23, bcolw, 24, bfn, 9.2,
+                     item_gap=0.5)
 
     # date check box
-    cby = bbot + 8
+    cby = bbot + 7
     date_check(d, (MARGIN, cby, W - MARGIN, cby + 30), DATE_CHECK_TEXT)
 
     # footer
-    d.text((MARGIN, cby + 36),
+    d.text((MARGIN, cby + 34),
            "Every story dated & sourced — checked Sunday 22 Nov 2026. "
            "Full source list on file for all 64 stories; claims are "
            "labelled as claims; market figures are Friday's closes. "
@@ -1026,7 +1143,7 @@ def build():
 
     if os.environ.get("RENDER_DEBUG"):
         print(f"index_bottom={ibot:.0f} briefs_bottom={bbot:.0f} "
-              f"datebox_bottom={cby + 30} footer_y={cby + 36}")
+              f"datebox_bottom={cby + 30} footer_y={cby + 34}")
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
     img.save(OUT, format="PNG", optimize=True)
