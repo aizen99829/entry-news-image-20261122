@@ -3,6 +3,7 @@
 // Copies the pre-rendered poster (assets/poster.png) to entry.png in the
 // output directory. Standard library only, no network access. The output
 // directory comes from MAKEFUN_OUTPUT_DIR, defaulting to /output.
+// The poster bytes are fixed, so every run writes identical output.
 
 import { copyFileSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
